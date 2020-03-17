@@ -1,21 +1,23 @@
 import tmi, { ChatUserstate } from 'tmi.js'; // For twitchChat socket server
-import connectDB from '../model/connectDB';
-import OnAdScheduler from '../lib/scheduler';
+import connectDB from '../../model/connectDB';
+import OnAdScheduler from '../../lib/scheduler';
 import { Chat } from './chat.d';
 
+require('dotenv').config();
+
 // configure constants
-const BOT_NAME = 'onadyy';
+const BOT_NAME = process.env.TWITCH_BOT_OAUTH_TOKEN;
 // const BOT_OAUTH_TOKEN = 'oauth:o6x02nuufgjlsv28bywzygfid5uzbu'; // hwasurr
-const BOT_OAUTH_TOKEN = 'oauth:nfn5l1uaylsq9q681ngx8dg6yxicwe'; // onadyy
+const BOT_OAUTH_TOKEN = process.env.TWITCH_BOT_OAUTH_TOKEN; // onadyy
 const JOIN_TIMEOUT = 8000;
 
 interface ChatContainer {
-   chatCount: number;
-   insertedChatCount: number;
-   chatBuffer: Array<Chat>;
- }
+  chatCount: number;
+  insertedChatCount: number;
+  chatBuffer: Array<Chat>;
+}
 
-interface OnADCollectorHandlers {
+interface Handlers {
   onConnectedHandler(address: string, port: number): void;
   onMessageHandler(channel: string, userstate: ChatUserstate, message: string, self: boolean): void;
   onDisconnectedHandler(reason: string): void;
@@ -28,12 +30,12 @@ interface OnADCollectorHandlers {
 /**
  * 온애드 트위치 채팅 수집기 v2
  */
-class TwitchChatCollectorV2 {
+class Bot {
   client: tmi.Client | null;
   private runningSchedulers: Array<OnAdScheduler>;
   private joinedChannels: Array<string>;
   private chatContainer: ChatContainer;
-  private handlers: OnADCollectorHandlers;
+  private handlers: Handlers;
 
   constructor() { // 인스턴스 속성 정의
     this.client = null;
@@ -222,4 +224,4 @@ class TwitchChatCollectorV2 {
   }
 }
 
-export default TwitchChatCollectorV2;
+export default Bot;

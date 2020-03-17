@@ -1,4 +1,4 @@
-import { Chat } from '../src/chat.d';
+import { Chat } from '../chat/twitch/chat.d';
 
 type ChatInsertQuery = string;
 type ChatInsertArray = Array<string | number | null | Date | undefined>;

@@ -1,7 +1,7 @@
-import TwitchChatCollectorV2 from './src/collector';
+import Bot from './chat/twitch/bot';
 
 
 // const TwitchChatCollector = require('./model/TwitchChatCollector');
 
-const onad = new TwitchChatCollectorV2();
+const onad = new Bot();
 onad.run();
