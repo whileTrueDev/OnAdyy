@@ -6,6 +6,23 @@ export interface ContractedCreatorsResult {
   creatorTwitchId: string;
 }
 
+export interface Link {
+  primary: boolean;
+  linkName: string;
+  linkTo: string;
+}
+export interface CampaignQueryResult {
+  campaignId: string;
+  campaignName: string;
+  marketerName: string;
+  linkId: string; // connectedLinkId
+  linkstring: string;
+}
+
+export interface Campaign extends CampaignQueryResult {
+  links: Link[];
+}
+
 // 계약된 모든 크리에이터 가져오기.
 function getContratedCreators(): Promise<ContractedCreatorsResult[]> {
   const getContractedChannelsQuery = `
@@ -45,7 +62,25 @@ function insertChats(chatBuffer: Chat[]): Promise<OkPacket> {
     });
 }
 
+// 모든 ON 상태인 캠페인 가져오기
+async function getActiveCampaigns(): Promise<Campaign[]> {
+  const query = `
+  SELECT campaign.campaignId, campaignName, marketerName, linkId, links as linkstring
+    FROM campaign
+  JOIN linkRegistered AS lr
+    ON campaign.connectedLinkId = lr.linkId
+  WHERE campaign.onOff = 1
+  `;
+  const row = await doQuery<CampaignQueryResult[]>(query);
+  if (row.error) {
+    throw Error(`getActiveCampaigns Error - ${row.error}`);
+  }
+  const result = row.result.map((camp) => ({ ...camp, links: JSON.parse(camp.linkstring).links }));
+  return result;
+}
+
 export default {
   getContratedCreators,
-  insertChats
+  insertChats,
+  getActiveCampaigns,
 };
