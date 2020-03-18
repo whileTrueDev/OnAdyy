@@ -120,10 +120,13 @@ class Bot {
           // 각 크리에이터마다 한번씩.
           const campaign = activeCampaigns.find((c) => c.campaignId === d.campaignId);
           if (campaign && this.joinedChannels.includes(d.creatorTwitchId)) {
-            let adString = '';
-            campaign.links.forEach((link) => {
-              adString += `${link.linkName} : ${link.linkTo} `;
-            });
+            // // 곧바로 광고주 랜딩페이지 송출시
+            // let adString = '';
+            // campaign.links.forEach((link) => {
+            //   adString += `${link.linkName} : ${link.linkTo} `;
+            // });
+
+            const adString = 'https://naver.com';
             this.sayAdMessage(d.creatorTwitchId, adString);
           }
         });

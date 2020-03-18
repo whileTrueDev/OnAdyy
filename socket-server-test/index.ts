@@ -4,6 +4,10 @@ import io from 'socket.io';
 
 const app = express();
 
+app.use('/', (req, res, next) => {
+  console.log('headers: ', req.headers);
+});
+
 const httpServer = http.createServer(app).listen(3000, () => {
   console.log('포트 3000에 연결되었습니다.');
 });
