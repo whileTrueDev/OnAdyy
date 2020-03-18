@@ -1,7 +1,7 @@
 import tmi, { ChatUserstate } from 'tmi.js'; // For twitchChat socket server
 import io from 'socket.io-client';
 
-import connectDB from '../../model/connectDB';
+import connectDB, { ContractedCreatorsResult } from '../../model/connectDB';
 import OnAdScheduler from '../../lib/scheduler';
 import { Chat } from './chat.d';
 
@@ -44,12 +44,13 @@ class Bot {
   private runningSchedulers: Array<OnAdScheduler>;
   private joinedChannels: Array<string>;
   private chatContainer: ChatContainer;
+  private creators: ContractedCreatorsResult[];
   private handlers: Handlers;
-
   constructor() { // 인스턴스 속성 정의
     this.chatBotClient = null;
     this.runningSchedulers = [];
     this.joinedChannels = []; // join 채널
+    this.creators = [];
     this.chatContainer = {
       chatCount: 0,
       chatBuffer: [], // ... chats
@@ -113,24 +114,13 @@ class Bot {
     }
     this.onadSocketClient.on('next-campaigns-twitch-chatbot', async (data: NextCampaignData[]) => {
       // 해당 이벤트 핸들러 따로 관리.
-      const activeCampaigns = await connectDB.getActiveCampaigns();
-      // 코드 최적화 변경 필요.. 반복문이 많다.
-      if (activeCampaigns.length > 0) {
-        data.forEach((d) => {
-          // 각 크리에이터마다 한번씩.
-          const campaign = activeCampaigns.find((c) => c.campaignId === d.campaignId);
-          if (campaign && this.joinedChannels.includes(d.creatorTwitchId)) {
-            // // 곧바로 광고주 랜딩페이지 송출시
-            // let adString = '';
-            // campaign.links.forEach((link) => {
-            //   adString += `${link.linkName} : ${link.linkTo} `;
-            // });
-
-            const adString = 'https://naver.com';
-            this.sayAdMessage(d.creatorTwitchId, adString);
-          }
-        });
-      }
+      data.forEach((d) => {
+        // 광고 채팅 ON상태인 크리에이터들 하나마다 한번씩 광고메시지 송출.
+        if (this.creators.findIndex((c) => c.adchatAgreement === 1 && c.creatorTwitchId === d.creatorTwitchId)) {
+          const adString = `http://onad.io/adchat/${d.campaignId}`;
+          this.sayAdMessage(d.creatorTwitchId, adString);
+        }
+      });
     });
   }
 
@@ -139,7 +129,6 @@ class Bot {
     const messageTemplate = '지금 나오고 있는 광고가 궁금하다면?\n';
     const adMessage = `${messageTemplate + adString}`;
     if (this.chatBotClient) {
-      console.log('sayAdUrl - ', channel);
       this.chatBotClient.say(channel, adMessage);
     }
   }
@@ -147,6 +136,7 @@ class Bot {
   runBot(): void {
     connectDB.getContratedCreators()
       .then((creators) => {
+        this.creators = creators;
         const contractedChannels = creators.map((creator) => creator.creatorTwitchId);
         console.log(`contractedChannels : ${contractedChannels.length}`);
         const OPTION = {

@@ -4,6 +4,7 @@ import { Chat } from '../chat/twitch/chat.d';
 
 export interface ContractedCreatorsResult {
   creatorTwitchId: string;
+  adchatAgreement: number;
 }
 
 export interface Link {
@@ -26,7 +27,7 @@ export interface Campaign extends CampaignQueryResult {
 // 계약된 모든 크리에이터 가져오기.
 function getContratedCreators(): Promise<ContractedCreatorsResult[]> {
   const getContractedChannelsQuery = `
-  SELECT creatorTwitchId
+  SELECT creatorTwitchId, adchatAgreement
     FROM creatorInfo
     WHERE creatorContractionAgreement = 1`;
   return doQuery<ContractedCreatorsResult[]>(getContractedChannelsQuery)

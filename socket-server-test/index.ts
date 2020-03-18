@@ -8,7 +8,7 @@ app.use('/', (req, res, next) => {
   console.log('headers: ', req.headers);
 });
 
-const httpServer = http.createServer(app).listen(3000, () => {
+const httpServer = http.createServer(app).listen(3005, () => {
   console.log('포트 3000에 연결되었습니다.');
 });
 
