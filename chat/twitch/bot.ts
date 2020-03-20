@@ -116,7 +116,8 @@ class Bot {
       // 해당 이벤트 핸들러 따로 관리.
       data.forEach((d) => {
         // 광고 채팅 ON상태인 크리에이터들 하나마다 한번씩 광고메시지 송출.
-        if (this.creators.findIndex((c) => c.adchatAgreement === 1 && c.creatorTwitchId === d.creatorTwitchId)) {
+        if (this.creators.findIndex((c) => c.adchatAgreement === 1
+        && c.creatorTwitchId === d.creatorTwitchId)) {
           const adString = `http://onad.io/adchat/${d.campaignId}`;
           this.sayAdMessage(d.creatorTwitchId, adString);
         }
