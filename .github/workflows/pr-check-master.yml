@@ -35,10 +35,10 @@ jobs:
     - name: Build (ts => js)
       run: yarn build
     
-    - name: Test
-      run : yarn test
+    # - name: Test
+    #   run : yarn test
 
-    - name: Eslint
+    - name: ESlint
       run : yarn lint
 
 
