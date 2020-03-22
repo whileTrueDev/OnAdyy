@@ -3,7 +3,6 @@
 .vs/
 .vs
 
-.eslintrc
 
 package-lock.json
 
@@ -20,7 +19,6 @@ docker-compose.debug.*
 ./node_modules/*
 node_modules/*
 node_modules/
-.eslintrc
 
 log/*
 /log/*
@@ -42,7 +40,6 @@ node_modules/*
 /.pnp
 .pnp.js
 
-.eslintrc
 
 # testing
 /coverage
