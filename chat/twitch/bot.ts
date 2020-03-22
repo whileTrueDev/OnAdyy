@@ -120,7 +120,7 @@ class Bot {
         if (data.campaignId && data.creatorTwitchId) {
           const adString = `https://onad.io/adchat/${data.campaignId}/${data.creatorTwitchId}`;
           this.sayAdMessage(data.creatorTwitchId, adString);
-          console.log('adchat to - ', data.creatorTwitchId);
+          console.log(`[${new Date().toLocaleString()}] adchat to - ${data.creatorTwitchId}`);
         }
       }
     });
