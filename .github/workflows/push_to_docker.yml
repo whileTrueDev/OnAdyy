@@ -1,0 +1,53 @@
+name: Docker Image CI
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+
+jobs:
+
+  build:
+    strategy:
+      matrix:
+        node-version: [10.x, 12.x]
+
+    runs-on: ubuntu-latest
+
+    # This workflow will do a clean install of node dependencies, build the source code and run tests across different versions of node
+    # For more information see: https://help.github.com/actions/language-and-framework-guides/using-nodejs-with-github-actions
+    steps:
+    - name: Checkout source code
+    - uses: actions/checkout@v2
+    
+    - uses: actions/cache@v1
+      id: yarn-cache # use this to check for `cache-hit` (`steps.yarn-cache.outputs.cache-hit != 'true'`)
+      with:
+        path: node_modules
+        key: ${{ runner.os }}-yarn-${{ hashFiles('**/yarn.lock') }}
+        restore-keys: |
+          ${{ runner.os }}-yarn-
+        
+    - name: Use Node.js ${{ matrix.node-version }}
+      uses: actions/setup-node@v1
+      with:
+        node-version: ${{ matrix.node-version }}
+    
+    - name: Install Dependencies
+      run: yarn install
+
+    - name: Push to docker hub
+      uses: elgohr/Publish-Docker-Github-Action@2.13
+      with:
+        name: hwasurr/onad_twitch_bot
+        username: ${{ secrets.DOCKER_USERNAME }}
+        password: ${{ secrets.DOCKER_PASSWORD }}
+        dockerfile: ./dockerfile
+        tags: "latest,${{ github.run_number }}"
+    
+
+
+
+
+
