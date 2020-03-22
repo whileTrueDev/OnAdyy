@@ -8,9 +8,9 @@
     "start": "ts-node index.ts",
     "start:debug": "nodemon --watch *.ts --exec ts-node index.ts",
     "start:debug:mac": "nodemon --watch ./ --exec ts-node index.ts",
-    "start:production": "set NODE_ENV=production && ts-node index.ts",
+    "start:production": "set NODE_ENV=production && node index.ts",
     "prebuild": "rimraf dist",
-    "build": "webpack --config webpack.config.js",
+    "build": "tsc",
     "test": "jest --config jest.config.json --coverage",
     "testsocketserver": "ts-node ./socket-server-test/index.ts"
   },

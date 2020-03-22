@@ -38,6 +38,9 @@ jobs:
     - name: Install Dependencies
       run: yarn install
 
+    - name: Build (ts => js)
+      run: yarn build
+
     - name: Push to docker hub
       uses: elgohr/Publish-Docker-Github-Action@2.13
       with:
