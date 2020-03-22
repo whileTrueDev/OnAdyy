@@ -150,10 +150,9 @@ class Bot {
           debug: true,
           connection: { reconnect: true, secure: true },
           identity: { username: BOT_NAME, password: BOT_OAUTH_TOKEN },
-          // channels: contractedChannels
-
+          channels: contractedChannels
           // test
-          channels: ['iamsupermazinga'] // , 'dkdkqwer', 'oxquizzz', 'kevin20222'
+          // channels: ['iamsupermazinga'] // , 'dkdkqwer', 'oxquizzz', 'kevin20222'
         };
 
         const client = tmi.Client(OPTION);
@@ -196,7 +195,7 @@ class Bot {
             setTimeout(() => {
               if (this.chatBotClient) {
                 this.chatBotClient.join(creator1)
-                  .catch((err) => { console.log(`channel join error: ${err}`); });
+                  .catch((err: any) => { console.log(`channel join error: ${err}`); });
               }
             }, idx * JOIN_TIMEOUT);
           };
