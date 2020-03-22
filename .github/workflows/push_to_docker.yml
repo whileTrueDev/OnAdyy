@@ -38,7 +38,7 @@ jobs:
     - name: Build (ts => js)
       run: yarn build
 
-    - name: Push to docker hub
+    - name: Dockerize and Push to docker hub
       uses: elgohr/Publish-Docker-Github-Action@2.13
       with:
         name: hwasurr/onad_twitch_bot
