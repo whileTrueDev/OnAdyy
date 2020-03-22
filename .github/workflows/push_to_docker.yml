@@ -51,7 +51,7 @@ jobs:
       uses: 8398a7/action-slack@v2.7.0
       with:
         status: ${{ job.status }}
-        author_name: OnAD alarm
+        author_name: OnAdyy Deploy Status
       env:
         SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
 
