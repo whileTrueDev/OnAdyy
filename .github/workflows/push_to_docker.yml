@@ -50,6 +50,15 @@ jobs:
         dockerfile: Dockerfile
         tags: "latest,${{ github.run_number }}"
     
+    - name: action-slack
+      uses: 8398a7/action-slack@v2.7.0
+      with:
+        status: ${{ job.status }}
+        author_name: OnAD alarm
+      env:
+        SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+
+    
 
 
 
