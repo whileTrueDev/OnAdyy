@@ -108,7 +108,22 @@ class Bot {
     } catch {
       throw Error('ONAD_SOCKET_HOST needed');
     }
-    this.runAdChat();
+    // onad 배너 송출 socket server 연결
+    interface NextCampaignData {
+      creatorId: string; creatorTwitchId: string; campaignId: string;
+    }
+    this.onadSocketClient.on('next-campaigns-twitch-chatbot', (data: NextCampaignData) => {
+      // 해당 이벤트 핸들러 따로 관리.
+      // 광고 채팅 ON상태인 크리에이터들 하나마다 한번씩 광고메시지 송출.
+      if (this.creators.findIndex((c) => c.adChatAgreement === ADCHAT_AGREE_STATE
+      && c.creatorTwitchId === data.creatorTwitchId) >= 0) {
+        if (data.campaignId && data.creatorTwitchId) {
+          const adString = `https://onad.io/adchat/${data.campaignId}/${data.creatorTwitchId}`;
+          this.sayAdMessage(data.creatorTwitchId, adString);
+          console.log('adchat to - ', data.creatorTwitchId);
+        }
+      }
+    });
   }
 
   // 광고 메시지 송출 함수
@@ -118,26 +133,6 @@ class Bot {
     if (this.chatBotClient) {
       this.chatBotClient.say(channel, adMessage);
     }
-  }
-
-  // 광고송출서버와 연결 - 광고메시지 송출 시작
-  runAdChat(): void {
-    // onad 배너 송출 socket server 연결
-    interface NextCampaignData {
-      creatorId: string; creatorTwitchId: string; campaignId: string;
-    }
-    this.onadSocketClient.on('next-campaigns-twitch-chatbot', (data: NextCampaignData) => {
-      // 해당 이벤트 핸들러 따로 관리.
-      // 광고 채팅 ON상태인 크리에이터들 하나마다 한번씩 광고메시지 송출.
-      if (this.creators.findIndex((c) => c.adChatAgreement === ADCHAT_AGREE_STATE
-      && c.creatorTwitchId === data.creatorTwitchId)) {
-        if (data.campaignId && data.creatorTwitchId) {
-          const adString = `https://onad.io/adchat/${data.campaignId}/${data.creatorTwitchId}`;
-          this.sayAdMessage(data.creatorTwitchId, adString);
-          console.log('adchat to - ', data.creatorTwitchId);
-        }
-      }
-    });
   }
 
   runBot(): void {
