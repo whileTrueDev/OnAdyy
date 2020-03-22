@@ -8,15 +8,10 @@ import { Chat } from './chat.d';
 require('dotenv').config();
 
 // configure constants
-const BOT_NAME = process.env.TWITCH_BOT_OAUTH_TOKEN;
-// const BOT_OAUTH_TOKEN = 'oauth:o6x02nuufgjlsv28bywzygfid5uzbu'; // hwasurr
+const ADCHAT_AGREE_STATE = 1;
+const BOT_NAME = 'onadyy';
+const { PRODUCTION_SOCKET_HOSTNAME } = process.env;
 const BOT_OAUTH_TOKEN = process.env.TWITCH_BOT_OAUTH_TOKEN; // onadyy
-let ONAD_SOCKET_HOST: string;
-if (process.env.DEV_ONAD_SOCKET_HOST) {
-  ONAD_SOCKET_HOST = process.env.DEV_ONAD_SOCKET_HOST;
-} else {
-  throw Error('ONAD_SOCKET_HOST is not defined - check env files');
-}
 const JOIN_TIMEOUT = 8000;
 
 interface ChatContainer {
@@ -107,31 +102,42 @@ class Bot {
       },
     };
 
-    // onad 배너 송출 socket server 연결
-    this.onadSocketClient = io(ONAD_SOCKET_HOST);
-    interface NextCampaignData {
-      creatorId: string; creatorTwitchId: string; campaignId: string;
+    try {
+      this.onadSocketClient = io(PRODUCTION_SOCKET_HOSTNAME as string);
+      console.log('onad banner broad socket connected - ', PRODUCTION_SOCKET_HOSTNAME);
+    } catch {
+      throw Error('ONAD_SOCKET_HOST needed');
     }
-    this.onadSocketClient.on('next-campaigns-twitch-chatbot', async (data: NextCampaignData[]) => {
-      // 해당 이벤트 핸들러 따로 관리.
-      data.forEach((d) => {
-        // 광고 채팅 ON상태인 크리에이터들 하나마다 한번씩 광고메시지 송출.
-        if (this.creators.findIndex((c) => c.adchatAgreement === 1
-        && c.creatorTwitchId === d.creatorTwitchId)) {
-          const adString = `http://onad.io/adchat/${d.campaignId}`;
-          this.sayAdMessage(d.creatorTwitchId, adString);
-        }
-      });
-    });
+    this.runAdChat();
   }
 
-  // 광고 메시지 송출
+  // 광고 메시지 송출 함수
   private sayAdMessage(channel: string, adString: string): void {
     const messageTemplate = '지금 나오고 있는 광고가 궁금하다면?\n';
     const adMessage = `${messageTemplate + adString}`;
     if (this.chatBotClient) {
       this.chatBotClient.say(channel, adMessage);
     }
+  }
+
+  // 광고송출서버와 연결 - 광고메시지 송출 시작
+  runAdChat(): void {
+    // onad 배너 송출 socket server 연결
+    interface NextCampaignData {
+      creatorId: string; creatorTwitchId: string; campaignId: string;
+    }
+    this.onadSocketClient.on('next-campaigns-twitch-chatbot', (data: NextCampaignData) => {
+      // 해당 이벤트 핸들러 따로 관리.
+      // 광고 채팅 ON상태인 크리에이터들 하나마다 한번씩 광고메시지 송출.
+      if (this.creators.findIndex((c) => c.adChatAgreement === ADCHAT_AGREE_STATE
+      && c.creatorTwitchId === data.creatorTwitchId)) {
+        if (data.campaignId && data.creatorTwitchId) {
+          const adString = `https://onad.io/adchat/${data.campaignId}/${data.creatorTwitchId}`;
+          this.sayAdMessage(data.creatorTwitchId, adString);
+          console.log('adchat to - ', data.creatorTwitchId);
+        }
+      }
+    });
   }
 
   runBot(): void {
@@ -247,10 +253,6 @@ class Bot {
   run(): void {
     this.runBot();
     this.runScheduler();
-
-    setInterval(() => {
-      this.onadSocketClient.emit('request next campaign');
-    }, 30000);
   }
 }
 export default Bot;
