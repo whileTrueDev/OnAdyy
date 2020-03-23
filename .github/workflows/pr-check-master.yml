@@ -36,10 +36,7 @@ jobs:
       run : yarn
     
     - name: Test with Jest    
-      uses: hwasurr/jest-reporter-action@v0.0.3
-      with:
-        github-token: ${{ secrets.GITHUB_TOKEN }}
-        test-command: "yarn jest --coverage"
+      run: yarn test
 
     - name: Build with webpack
       run : yarn build
