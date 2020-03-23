@@ -36,7 +36,7 @@ jobs:
       run : yarn
     
     - name: Test with Jest    
-      uses: hwasurr/jest-reporter-action@v0.0.2
+      uses: hwasurr/jest-reporter-action@v0.0.3
       with:
         github-token: ${{ secrets.GITHUB_TOKEN }}
         test-command: "yarn jest --coverage"
