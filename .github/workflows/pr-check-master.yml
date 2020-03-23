@@ -34,12 +34,12 @@ jobs:
 
     - name: Install dependencies
       run : yarn
-
-    - name: ESlint
-      run : yarn lint
     
-    - name: Test with Jest
-      run : yarn test
+    - name: Test with Jest    
+      uses: ziishaned/jest-reporter-action@v0.0.1
+      with:
+        github-token: ${{ secrets.GITHUB_TOKEN }}
+        test-command: "yarn jest --coverage"
 
     - name: Build with webpack
       run : yarn build

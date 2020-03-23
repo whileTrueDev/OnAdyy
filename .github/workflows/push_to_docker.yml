@@ -32,7 +32,10 @@ jobs:
       with:
         node-version: ${{ matrix.node-version }}
 
-    - name: Build (ts => js)
+    - name: Install dependencies
+      run: yarn
+
+    - name: Build with webpack
       run: yarn build
 
     - name: Dockerize and Push to docker hub
