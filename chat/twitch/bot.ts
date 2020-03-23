@@ -3,7 +3,7 @@ import io from 'socket.io-client';
 
 import connectDB, { ContractedCreatorsResult } from '../../model/connectDB';
 import OnAdScheduler from '../../lib/scheduler';
-import { Chat } from './chat.d';
+import { Chat } from './chat.type';
 
 require('dotenv').config();
 
@@ -41,6 +41,7 @@ class Bot {
   private chatContainer: ChatContainer;
   private creators: ContractedCreatorsResult[];
   private handlers: Handlers;
+
   constructor() { // 인스턴스 속성 정의
     this.chatBotClient = null;
     this.runningSchedulers = [];
@@ -102,16 +103,31 @@ class Bot {
       },
     };
 
+    // onad 배너 송출 socket server 연결
     try {
       this.onadSocketClient = io(PRODUCTION_SOCKET_HOSTNAME as string);
       console.log('onad banner broad socket connected - ', PRODUCTION_SOCKET_HOSTNAME);
     } catch {
       throw Error('ONAD_SOCKET_HOST needed');
     }
-    // onad 배너 송출 socket server 연결
+  }
+
+  // 광고 메시지 송출 함수
+  private sayAdMessage(channel: string, adString: string): void {
+    const messageTemplate = '지금 나오고 있는 광고가 궁금하다면?\n';
+    const adMessage = `${messageTemplate + adString}`;
+    if (this.chatBotClient) {
+      this.chatBotClient.say(channel, adMessage)
+        .catch((err) => console.log(`sayAdMessage error - ${err}`));
+    }
+  }
+
+  // 광고 메시지 송출 핸들러 생성 함수 ( 광고채팅 - 시작 함수 )
+  runAdChat(): void {
     interface NextCampaignData {
       creatorId: string; creatorTwitchId: string; campaignId: string;
     }
+    console.log('Ad Chat handler ON!');
     this.onadSocketClient.on('next-campaigns-twitch-chatbot', (data: NextCampaignData) => {
       // 해당 이벤트 핸들러 따로 관리.
       // 광고 채팅 ON상태인 크리에이터들 하나마다 한번씩 광고메시지 송출.
@@ -126,12 +142,18 @@ class Bot {
     });
   }
 
-  // 광고 메시지 송출 함수
-  private sayAdMessage(channel: string, adString: string): void {
-    const messageTemplate = '지금 나오고 있는 광고가 궁금하다면?\n';
-    const adMessage = `${messageTemplate + adString}`;
+  private startClient(OPTION: tmi.Options): void {
+    const client = tmi.Client(OPTION);
+    this.chatBotClient = client;
     if (this.chatBotClient) {
-      this.chatBotClient.say(channel, adMessage);
+      this.chatBotClient.on('connected', this.handlers.onConnectedHandler);
+      this.chatBotClient.on('join', this.handlers.onJoinHandler);
+      this.chatBotClient.on('message', this.handlers.onMessageHandler);
+      this.chatBotClient.on('disconnected', this.handlers.onDisconnectedHandler);
+      this.chatBotClient.on('reconnect', this.handlers.onReconnectHandler);
+      this.chatBotClient.on('ping', this.handlers.onPingHandler);
+      this.chatBotClient.on('timeout', this.handlers.onTimeoutHandler);
+      this.chatBotClient.connect();
     }
   }
 
@@ -146,29 +168,27 @@ class Bot {
           connection: { reconnect: true, secure: true },
           identity: { username: BOT_NAME, password: BOT_OAUTH_TOKEN },
           channels: contractedChannels
-          // test
-          // channels: ['iamsupermazinga'] // , 'dkdkqwer', 'oxquizzz', 'kevin20222'
         };
 
-        const client = tmi.Client(OPTION);
-        this.chatBotClient = client;
-        if (this.chatBotClient) {
-          this.chatBotClient.on('connected', this.handlers.onConnectedHandler);
-          this.chatBotClient.on('join', this.handlers.onJoinHandler);
-          this.chatBotClient.on('message', this.handlers.onMessageHandler);
-          this.chatBotClient.on('disconnected', this.handlers.onDisconnectedHandler);
-          this.chatBotClient.on('reconnect', this.handlers.onReconnectHandler);
-          this.chatBotClient.on('ping', this.handlers.onPingHandler);
-          this.chatBotClient.on('timeout', this.handlers.onTimeoutHandler);
-          this.chatBotClient.connect();
-        }
+        this.startClient(OPTION);
       });
+  }
+
+  runBotTest(): void {
+    const OPTION = {
+      debug: true,
+      connection: { reconnect: true, secure: true },
+      identity: { username: BOT_NAME, password: BOT_OAUTH_TOKEN },
+      channels: ['iamsupermazinga', 'dkdkqwer'] // 'oxquizzz', 'kevin20222'
+    };
+    this.startClient(OPTION);
   }
 
   healthCheck(): void { // 로깅 및 헬스체크 - 1 or 5분 단위
     console.log('=================== healthCheck ====================');
     console.log('[TIME]: ', new Date().toLocaleString());
     console.log(`[Collecting channels]: ${this.joinedChannels.length}`);
+    console.log(`[Get channels Length]: ${this.chatBotClient?.getChannels().length}`);
     console.log('[All chats on client]: ', this.chatContainer.chatCount);
     console.log('[Chats on collector buffer]: ', this.chatContainer.chatBuffer.length);
     console.log(`[Chats inserted]: ${this.chatContainer.insertedChatCount}`);
@@ -177,29 +197,30 @@ class Bot {
 
   private addNewCreator(): void { // 새로운/정지된 크리에이터 채널에 입장 - 매일 0시 1분.
     console.log('=============== AddNewCreator ===============');
-    connectDB.getContratedCreators()
-      .then((allCreator) => {
-        // 새로운 크리에이터 채널 입장
-        let newCreators = allCreator.map((creator) => creator.creatorTwitchId);
-        newCreators = newCreators.filter(
-          (creator) => !(this.joinedChannels.includes(creator))
-        );
+    // 새로운 크리에이터 채널 입장
+    if (this.chatBotClient) {
+      const channels = this.chatBotClient.getChannels().map((channel) => channel.replace('#', ''));
+      const newCreators = this.creators.filter(
+        (creator) => !(channels.includes(creator.creatorTwitchId))
+      );
 
-        newCreators.forEach((creator, idx) => {
-          const anonFunc = (creator1: string): void => {
-            setTimeout(() => {
-              if (this.chatBotClient) {
-                this.chatBotClient.join(creator1)
-                  .catch((err: any) => { console.log(`channel join error: ${err}`); });
-              }
-            }, idx * JOIN_TIMEOUT);
-          };
-          anonFunc(creator);
-        });
-      })
-      .catch((err) => {
-        console.log(`[Error] ${err}`);
+      newCreators.forEach((creator, idx) => {
+        const anonFunc = (creator1: string): void => {
+          setTimeout(() => {
+            if (this.chatBotClient) {
+              this.chatBotClient.join(creator1)
+                .catch((err: any) => { console.log(`channel join error: ${err}`); });
+            }
+          }, idx * JOIN_TIMEOUT);
+        };
+        anonFunc(creator.creatorTwitchId);
       });
+    }
+  }
+
+  private getCreators(): void {
+    connectDB.getContratedCreators()
+      .then((allCreators) => { this.creators = allCreators; });
   }
 
   private chatPeriodicInsert(): void { // 주기적 채팅로그 삽입 - 매 10분
@@ -236,17 +257,23 @@ class Bot {
     const chatPeriodicInsertScheduler = new OnAdScheduler(
       'auatoinsert', '*/10 * * * *', this.chatPeriodicInsert.bind(this)
     );
+    const getCreatorsDataScheduler = new OnAdScheduler(
+      'getCreatorsData', '5,15,25,35,45,55 * * * *', this.getCreators.bind(this)
+    );
 
     this.runningSchedulers = [
       healthCheckScheduler,
       addNewCreatorScheduler,
-      chatPeriodicInsertScheduler
+      chatPeriodicInsertScheduler,
+      getCreatorsDataScheduler
     ];
   }
 
   run(): void {
+    // this.runBotTest();
     this.runBot();
     this.runScheduler();
+    this.runAdChat();
   }
 }
 export default Bot;

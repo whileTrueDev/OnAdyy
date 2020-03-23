@@ -1,6 +1,6 @@
 import doQuery, { OkPacket } from './doQuery'; // For data insert
 import createChatInsertQueryValues from '../lib/createChatInsertQueryValues'; // For Query
-import { Chat } from '../chat/twitch/chat.d';
+import { Chat } from '../chat/twitch/chat.type';
 
 export interface ContractedCreatorsResult {
   creatorTwitchId: string;
