@@ -1,4 +1,4 @@
-name: Push To Docker
+name: Pull Request Checks
 
 on:
   pull_request:

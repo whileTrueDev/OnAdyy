@@ -141,6 +141,21 @@ class Bot {
     });
   }
 
+  private startClient(OPTION: tmi.Options): void {
+    const client = tmi.Client(OPTION);
+    this.chatBotClient = client;
+    if (this.chatBotClient) {
+      this.chatBotClient.on('connected', this.handlers.onConnectedHandler);
+      this.chatBotClient.on('join', this.handlers.onJoinHandler);
+      this.chatBotClient.on('message', this.handlers.onMessageHandler);
+      this.chatBotClient.on('disconnected', this.handlers.onDisconnectedHandler);
+      this.chatBotClient.on('reconnect', this.handlers.onReconnectHandler);
+      this.chatBotClient.on('ping', this.handlers.onPingHandler);
+      this.chatBotClient.on('timeout', this.handlers.onTimeoutHandler);
+      this.chatBotClient.connect();
+    }
+  }
+
   runBot(): void {
     connectDB.getContratedCreators()
       .then((creators) => {
@@ -154,18 +169,7 @@ class Bot {
           channels: contractedChannels
         };
 
-        const client = tmi.Client(OPTION);
-        this.chatBotClient = client;
-        if (this.chatBotClient) {
-          this.chatBotClient.on('connected', this.handlers.onConnectedHandler);
-          this.chatBotClient.on('join', this.handlers.onJoinHandler);
-          this.chatBotClient.on('message', this.handlers.onMessageHandler);
-          this.chatBotClient.on('disconnected', this.handlers.onDisconnectedHandler);
-          this.chatBotClient.on('reconnect', this.handlers.onReconnectHandler);
-          this.chatBotClient.on('ping', this.handlers.onPingHandler);
-          this.chatBotClient.on('timeout', this.handlers.onTimeoutHandler);
-          this.chatBotClient.connect();
-        }
+        this.startClient(OPTION);
       });
   }
 
@@ -176,22 +180,7 @@ class Bot {
       identity: { username: BOT_NAME, password: BOT_OAUTH_TOKEN },
       channels: ['iamsupermazinga', 'dkdkqwer'] // 'oxquizzz', 'kevin20222'
     };
-
-    const client = tmi.Client(OPTION);
-    this.chatBotClient = client;
-    if (this.chatBotClient) {
-      this.chatBotClient.on('connected', this.handlers.onConnectedHandler);
-      this.chatBotClient.on('join', this.handlers.onJoinHandler);
-      this.chatBotClient.on('message', this.handlers.onMessageHandler);
-      this.chatBotClient.on('disconnected', this.handlers.onDisconnectedHandler);
-      this.chatBotClient.on('reconnect', this.handlers.onReconnectHandler);
-      this.chatBotClient.on('ping', this.handlers.onPingHandler);
-      this.chatBotClient.on('timeout', this.handlers.onTimeoutHandler);
-      this.chatBotClient.on('roomstate', (channel, state) => {
-        console.log(channel, state);
-      });
-      this.chatBotClient.connect();
-    }
+    this.startClient(OPTION);
   }
 
   healthCheck(): void { // 로깅 및 헬스체크 - 1 or 5분 단위
@@ -280,10 +269,10 @@ class Bot {
   }
 
   run(): void {
-    // this.runBot();
-    this.runBotTest();
+    // this.runBotTest();
+    this.runBot();
     this.runScheduler();
-    // this.runAdChat();
+    this.runAdChat();
   }
 }
 export default Bot;
