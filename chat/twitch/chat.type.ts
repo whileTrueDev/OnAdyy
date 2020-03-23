@@ -7,6 +7,6 @@ export interface Chat {
   userid: string | undefined;
   subscriber: boolean | undefined;
   manager: boolean | undefined;
-  badges: tmi.Badges | undefined;
+  badges: Badges | undefined;
   text: string;
 }

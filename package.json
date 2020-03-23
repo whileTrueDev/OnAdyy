@@ -8,10 +8,10 @@
     "start": "ts-node index.ts",
     "start:debug": "nodemon --watch *.ts --exec ts-node index.ts",
     "start:debug:mac": "nodemon --watch ./ --exec ts-node index.ts",
-    "start:production": "set NODE_ENV=production && node ./dist/index.js",
+    "start:production": "set NODE_ENV=production && node ./dist/bundle.js",
     "prebuild": "rimraf dist",
-    "build": "tsc",
-    "test": "jest --config jest.config.json --coverage",
+    "build": "webpack --config webpack.config.js",
+    "test": "jest --coverage --detectOpenHandles --forceExit --watchAll=false",
     "lint": "eslint ."
   },
   "dependencies": {
@@ -20,7 +20,6 @@
     "mysql": "^2.17.1",
     "node-schedule": "^1.3.2",
     "socket.io-client": "^2.3.0",
-    "ts-node": "^8.6.2",
     "tmi.js": "^1.5.0"
   },
   "devDependencies": {
@@ -46,10 +45,14 @@
     "nodemon": "^2.0.2",
     "prettier": "^1.19.1",
     "rimraf": "^3.0.2",
+    "socket.io": "^2.3.0",
     "ts-loader": "^6.2.1",
     "typescript": "^3.8.3",
     "webpack": "^4.42.0",
-    "webpack-node-externals": "^1.7.2"
+    "webpack-cli": "^3.3.11",
+    "webpack-node-externals": "^1.7.2",
+    "ts-jest": "^25.2.1",
+    "ts-node": "^8.6.2"
   },
   "prettier": {
     "singleQuote": true,
@@ -58,5 +61,25 @@
     "tabWidth": 2,
     "trailingComma": "all",
     "printWidth": 80
+  },
+  "jest": {
+    "rootDir": "./",
+    "transform": {
+      "^.+\\.ts$": "ts-jest"
+    },
+    "testRegex": [
+      "\\.spec\\.ts$",
+      "\\.test\\.ts$",
+      "\\.spec\\.js$",
+      "\\.test\\.js$"
+    ],
+    "moduleFileExtensions": [
+      "ts", "js"
+    ],
+    "globals": {
+      "ts-jest": {
+        "diagnostics": true
+      }
+    }
   }
 }

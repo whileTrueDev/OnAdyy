@@ -3,7 +3,7 @@ import io from 'socket.io-client';
 
 import connectDB, { ContractedCreatorsResult } from '../../model/connectDB';
 import OnAdScheduler from '../../lib/scheduler';
-import { Chat } from './chat.d';
+import { Chat } from './chat.type';
 
 require('dotenv').config();
 
@@ -41,6 +41,7 @@ class Bot {
   private chatContainer: ChatContainer;
   private creators: ContractedCreatorsResult[];
   private handlers: Handlers;
+
   constructor() { // 인스턴스 속성 정의
     this.chatBotClient = null;
     this.runningSchedulers = [];

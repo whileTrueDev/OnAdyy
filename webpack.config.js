@@ -2,13 +2,19 @@ const nodeExternals = require('webpack-node-externals');
 const path = require('path');
 
 module.exports = {
-  entry: 'index.ts',
+  entry: './index.ts',
   module: {
     rules: [
       {
         test: /\.ts?$/,
-        use: 'ts-loader',
-        exclude: /node_modules/
+        loader: 'ts-loader',
+        options: {
+          configFile: './tsconfig.webpack.json'
+        },
+        exclude: [
+          /node_modules/
+        ],
+
       }
     ]
   },

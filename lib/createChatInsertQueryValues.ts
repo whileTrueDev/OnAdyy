@@ -1,4 +1,4 @@
-import { Chat } from '../chat/twitch/chat.d';
+import { Chat } from '../chat/twitch/chat.type';
 
 type ChatInsertQuery = string;
 type ChatInsertArray = Array<string | number | null | Date | undefined>;
@@ -6,7 +6,7 @@ function createChatInsertQueryValues(data: Chat[]): [ChatInsertQuery, ChatInsert
   const insertQuery = `
     INSERT INTO twitchChat
     ( creatorId, time, name, userId, subscriber, manager, badges, text )
-    VALUES`;
+    VALUES `;
   let queryArray: ChatInsertArray = [];
   let queryValues: ChatInsertQuery = '';
 
