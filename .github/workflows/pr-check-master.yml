@@ -34,12 +34,9 @@ jobs:
 
     - name: Install dependencies
       run : yarn
-
-    - name: ESlint
-      run : yarn lint
     
-    - name: Test with Jest
-      run : yarn test
+    - name: Test with Jest    
+      run: yarn test
 
     - name: Build with webpack
       run : yarn build

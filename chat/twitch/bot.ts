@@ -113,9 +113,9 @@ class Bot {
   }
 
   // 광고 메시지 송출 함수
-  private sayAdMessage(channel: string, adString: string): void {
-    const messageTemplate = '지금 나오고 있는 광고가 궁금하다면?\n';
-    const adMessage = `${messageTemplate + adString}`;
+  private sayAdMessage(channel: string, adString: string,
+    messagePrefix = '지금 나오고 있는 광고가 궁금하다면?\n'): void {
+    const adMessage = `${messagePrefix + adString}`;
     if (this.chatBotClient) {
       this.chatBotClient.say(channel, adMessage)
         .catch((err) => console.log(`sayAdMessage error - ${err}`));
@@ -125,17 +125,22 @@ class Bot {
   // 광고 메시지 송출 핸들러 생성 함수 ( 광고채팅 - 시작 함수 )
   runAdChat(): void {
     interface NextCampaignData {
-      creatorId: string; creatorTwitchId: string; campaignId: string;
+      creatorId: string; creatorTwitchId: string; campaignId: string; campaignName: string;
     }
     console.log('Ad Chat handler ON!');
     this.onadSocketClient.on('next-campaigns-twitch-chatbot', (data: NextCampaignData) => {
-      // 해당 이벤트 핸들러 따로 관리.
-      // 광고 채팅 ON상태인 크리에이터들 하나마다 한번씩 광고메시지 송출.
+      // findIndex returns -1 when target value is not exists in array
       if (this.creators.findIndex((c) => c.adChatAgreement === ADCHAT_AGREE_STATE
-      && c.creatorTwitchId === data.creatorTwitchId) >= 0) {
+        && c.creatorTwitchId === data.creatorTwitchId) >= 0) {
+        // AD 챗 동의한 크리에이터 인 경우.
         if (data.campaignId && data.creatorTwitchId) {
+          // 데이터가 올바르게 온 경우.
           const adString = `https://onad.io/adchat/${data.campaignId}/${data.creatorTwitchId}`;
-          this.sayAdMessage(data.creatorTwitchId, adString);
+          if (data.campaignName) {
+            this.sayAdMessage(data.creatorTwitchId, adString, data.campaignName);
+          } else {
+            this.sayAdMessage(data.creatorTwitchId, adString);
+          }
           console.log(`[${new Date().toLocaleString()}] adchat to - ${data.creatorTwitchId}`);
         }
       }
