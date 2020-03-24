@@ -133,7 +133,8 @@ class Bot {
       if (this.creators.findIndex((c) => c.adChatAgreement === ADCHAT_AGREE_STATE
         && c.creatorTwitchId === data.creatorTwitchId) >= 0) {
         // AD 챗 동의한 크리에이터 인 경우.
-        if (data.campaignId && data.creatorTwitchId) { // 데이터가 올바르게 온 경우.
+        if (data.campaignId && data.creatorTwitchId) {
+          // 데이터가 올바르게 온 경우.
           const adString = `https://onad.io/adchat/${data.campaignId}/${data.creatorTwitchId}`;
           if (data.campaignName) {
             this.sayAdMessage(data.creatorTwitchId, adString, data.campaignName);
