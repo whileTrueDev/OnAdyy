@@ -115,7 +115,7 @@ class Bot {
   // 광고 메시지 송출 함수
   private sayAdMessage(channel: string, adString: string,
     messagePrefix = '지금 나오고 있는 광고가 궁금하다면?\n'): void {
-    const adMessage = `${messagePrefix + adString}`;
+    const adMessage = `${`${messagePrefix}\n${adString}`}`;
     if (this.chatBotClient) {
       this.chatBotClient.say(channel, adMessage)
         .catch((err) => console.log(`sayAdMessage error - ${err}`));
