@@ -35,7 +35,7 @@ interface Handlers {
  */
 class Bot {
   chatBotClient: tmi.Client | null;
-  onadSocketClient: SocketIOClient.Socket;
+  // onadSocketClient: SocketIOClient.Socket;
   private runningSchedulers: Array<OnAdScheduler>;
   private joinedChannels: Array<string>;
   private chatContainer: ChatContainer;
@@ -104,12 +104,12 @@ class Bot {
     };
 
     // onad 배너 송출 socket server 연결
-    try {
-      this.onadSocketClient = io(PRODUCTION_SOCKET_HOSTNAME as string);
-      console.log('onad banner broad socket connected - ', PRODUCTION_SOCKET_HOSTNAME);
-    } catch {
-      throw Error('ONAD_SOCKET_HOST needed');
-    }
+    // try {
+    //   this.onadSocketClient = io(PRODUCTION_SOCKET_HOSTNAME as string);
+    //   console.log('onad banner broad socket connected - ', PRODUCTION_SOCKET_HOSTNAME);
+    // } catch {
+    //   throw Error('ONAD_SOCKET_HOST needed');
+    // }
   }
 
   // 광고 메시지 송출 함수
@@ -123,29 +123,29 @@ class Bot {
   }
 
   // 광고 메시지 송출 핸들러 생성 함수 ( 광고채팅 - 시작 함수 )
-  runAdChat(): void {
-    interface NextCampaignData {
-      creatorId: string; creatorTwitchId: string; campaignId: string; campaignName: string;
-    }
-    console.log('Ad Chat handler ON!');
-    this.onadSocketClient.on('next-campaigns-twitch-chatbot', (data: NextCampaignData) => {
-      // findIndex returns -1 when target value is not exists in array
-      if (this.creators.findIndex((c) => c.adChatAgreement === ADCHAT_AGREE_STATE
-        && c.creatorTwitchId === data.creatorTwitchId) >= 0) {
-        // AD 챗 동의한 크리에이터 인 경우.
-        if (data.campaignId && data.creatorTwitchId) {
-          // 데이터가 올바르게 온 경우.
-          const adString = `https://onad.io/adchat/${data.campaignId}/${data.creatorTwitchId}`;
-          if (data.campaignName) {
-            this.sayAdMessage(data.creatorTwitchId, adString, data.campaignName);
-          } else {
-            this.sayAdMessage(data.creatorTwitchId, adString);
-          }
-          console.log(`[${new Date().toLocaleString()}] adchat to - ${data.creatorTwitchId}`);
-        }
-      }
-    });
-  }
+  // runAdChat(): void {
+  //   interface NextCampaignData {
+  //     creatorId: string; creatorTwitchId: string; campaignId: string; campaignName: string;
+  //   }
+  //   console.log('Ad Chat handler ON!');
+  //   this.onadSocketClient.on('next-campaigns-twitch-chatbot', (data: NextCampaignData) => {
+  //     // findIndex returns -1 when target value is not exists in array
+  //     if (this.creators.findIndex((c) => c.adChatAgreement === ADCHAT_AGREE_STATE
+  //       && c.creatorTwitchId === data.creatorTwitchId) >= 0) {
+  //       // AD 챗 동의한 크리에이터 인 경우.
+  //       if (data.campaignId && data.creatorTwitchId) {
+  //         // 데이터가 올바르게 온 경우.
+  //         const adString = `https://onad.io/adchat/${data.campaignId}/${data.creatorTwitchId}`;
+  //         if (data.campaignName) {
+  //           this.sayAdMessage(data.creatorTwitchId, adString, data.campaignName);
+  //         } else {
+  //           this.sayAdMessage(data.creatorTwitchId, adString);
+  //         }
+  //         console.log(`[${new Date().toLocaleString()}] adchat to - ${data.creatorTwitchId}`);
+  //       }
+  //     }
+  //   });
+  // }
 
   private startClient(OPTION: tmi.Options): void {
     const client = tmi.Client(OPTION);
@@ -184,7 +184,7 @@ class Bot {
       debug: true,
       connection: { reconnect: true, secure: true },
       identity: { username: BOT_NAME, password: BOT_OAUTH_TOKEN },
-      channels: ['iamsupermazinga', 'dkdkqwer'] // 'oxquizzz', 'kevin20222'
+      channels: ['lck'] // 'oxquizzz', 'kevin20222'
     };
     this.startClient(OPTION);
   }
@@ -256,29 +256,29 @@ class Bot {
     const healthCheckScheduler = new OnAdScheduler(
       'healthcheck', '* * * * *', this.healthCheck.bind(this)
     );
-    const addNewCreatorScheduler = new OnAdScheduler(
-      'addnewcreator', '1 0 * * *', this.addNewCreator.bind(this)
-    );
+    // const addNewCreatorScheduler = new OnAdScheduler(
+    //   'addnewcreator', '1 0 * * *', this.addNewCreator.bind(this)
+    // );
     const chatPeriodicInsertScheduler = new OnAdScheduler(
       'auatoinsert', '*/10 * * * *', this.chatPeriodicInsert.bind(this)
     );
-    const getCreatorsDataScheduler = new OnAdScheduler(
-      'getCreatorsData', '5,15,25,35,45,55 * * * *', this.getCreators.bind(this)
-    );
+    // const getCreatorsDataScheduler = new OnAdScheduler(
+    //   'getCreatorsData', '5,15,25,35,45,55 * * * *', this.getCreators.bind(this)
+    // );
 
     this.runningSchedulers = [
       healthCheckScheduler,
-      addNewCreatorScheduler,
+      // addNewCreatorScheduler,
       chatPeriodicInsertScheduler,
-      getCreatorsDataScheduler
+      // getCreatorsDataScheduler
     ];
   }
 
   run(): void {
-    // this.runBotTest();
-    this.runBot();
+    this.runBotTest();
+    // this.runBot();
     this.runScheduler();
-    this.runAdChat();
+    // this.runAdChat();
   }
 }
 export default Bot;
