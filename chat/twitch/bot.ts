@@ -275,8 +275,8 @@ class Bot {
   }
 
   run(): void {
-    this.runBotTest();
-    // this.runBot();
+    // this.runBotTest();
+    this.runBot();
     this.runScheduler();
     // this.runAdChat();
   }
