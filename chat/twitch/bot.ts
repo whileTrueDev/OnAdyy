@@ -184,7 +184,7 @@ class Bot {
       debug: true,
       connection: { reconnect: true, secure: true },
       identity: { username: BOT_NAME, password: BOT_OAUTH_TOKEN },
-      channels: ['iamsupermazinga', 'dkdkqwer'] // 'oxquizzz', 'kevin20222'
+      channels: ['iamsupermazinga'] // 'oxquizzz', 'kevin20222'
     };
     this.startClient(OPTION);
   }
@@ -278,7 +278,7 @@ class Bot {
     // this.runBotTest();
     this.runBot();
     this.runScheduler();
-    this.runAdChat();
+    // this.runAdChat();
   }
 }
 export default Bot;
