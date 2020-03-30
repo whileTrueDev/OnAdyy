@@ -278,7 +278,7 @@ class Bot {
     // this.runBotTest();
     this.runBot();
     this.runScheduler();
-    // this.runAdChat();
+    this.runAdChat();
   }
 }
 export default Bot;
