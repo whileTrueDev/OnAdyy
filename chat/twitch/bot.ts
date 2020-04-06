@@ -125,7 +125,8 @@ class Bot {
   // 광고 메시지 송출 핸들러 생성 함수 ( 광고채팅 - 시작 함수 )
   runAdChat(): void {
     interface NextCampaignData {
-      creatorId: string; creatorTwitchId: string; campaignId: string; linkName: string;
+      creatorId: string; creatorTwitchId: string;
+      campaignId: string; campaignName: string; linkName: string;
     }
     console.log('Ad Chat handler ON!');
     this.onadSocketClient.on('next-campaigns-twitch-chatbot', (data: NextCampaignData) => {
