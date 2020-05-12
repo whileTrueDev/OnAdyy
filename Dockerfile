@@ -3,7 +3,6 @@ ENV NODE_ENV production
 
 # timezone 설정
 ENV TZ=Asia/Seoul
-RUN sudo apt install tzdata
 RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
 
 RUN mkdir -p /home/twitchChat
