@@ -20,6 +20,11 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: ap-northeast-2
 
+      - name: TS Build
+        run: |
+          yarn
+          yarn build
+
       - name: Build, tag, and push image to Docker Hub
         uses: elgohr/Publish-Docker-Github-Action@2.14
         with:
@@ -32,7 +37,7 @@ jobs:
         id: task-def
         uses: aws-actions/amazon-ecs-render-task-definition@v1
         with:
-          task-definition: server/task-definition.json
+          task-definition: task-definition.json
           container-name: onad-twitch-bot
           image: ${{ secrets.DOCKER_USERNAME }}/onad_twitch_bot:${{ github.sha }}
 
